@@ -30,7 +30,7 @@ combined_raster_path = os.path.join(intermediate_dir, "CombinedRasters", "c{}_{}
 
 # Table paths
 crop_params_path = os.path.join(table_dir, "cdl_params.csv")
-gen_params_path = os.path.join(table_dir, "crop_group_params.csv")
+gen_params_path = os.path.join(table_dir, "curve_numbers.csv")
 crop_dates_path = os.path.join(table_dir, "crop_dates.csv")
 crop_group_path = os.path.join(table_dir, "crop_groups.csv")
 met_attributes_path = os.path.join(table_dir, "met_params.csv")
@@ -46,7 +46,7 @@ remote_shapefile_path = os.altsep.join(("National", "Shapefiles"))
 hydro_file_path = os.path.join(production_dir, "HydroFiles", "region_{}_{{}}.npz")  # region, type
 recipe_path = os.path.join(production_dir, "RecipeFiles", "r{}_{}.npz")  # region, year
 sam_scenario_path = os.path.join(production_dir, "SamScenarios", "r{}.csv")  # region, year
-pwc_scenario_path = os.path.join(production_dir, "PwcScenarios", "r{}_{}.csv")  # region, crop name
+pwc_scenario_path = os.path.join(production_dir, "PwcScenarios", "{1}", "r{0}_{1}.csv")  # region, crop name
 pwc_metfile_path = os.path.join(production_dir, "PwcMetfiles", "s{}.csv")
 
 # Remote input data

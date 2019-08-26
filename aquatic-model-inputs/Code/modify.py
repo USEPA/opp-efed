@@ -180,7 +180,7 @@ def soils(in_soils, depth_weight=False, aggregate=False):
     for field in horizon_fields:
         check_fields = ['{}_{}'.format(field, i + 1) for i in range(max_horizons)]
         if qc_table[check_fields].values.max() > 1:  # QC value of 2 indicates invalid data
-            violations = (qc_table[check_fields] > 2).values
+            violations = (qc_table[check_fields] >= 2).values
             keep_horizons = np.where(violations.any(1), violations.argmax(1), max_horizons)
             in_soils['n_horizons'] = np.minimum(in_soils.n_horizons.values, keep_horizons)
     in_soils['n_horizons'] = in_soils.n_horizons.fillna(0).astype(np.int32)

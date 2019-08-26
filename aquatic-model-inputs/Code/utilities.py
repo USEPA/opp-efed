@@ -54,7 +54,7 @@ class FieldMatrix(object):
             burn = self.matrix[condition].copy()
             new_rows = []
             for idx, row in self.matrix[self.matrix[select_field] == 1].iterrows():
-                burn.ix[idx] = 1
+                burn.iloc[idx] = 1
                 for i in numbers:
                     new_row = row.copy()
                     new_row['internal_name'] = row.internal_name + "_" + str(i)
