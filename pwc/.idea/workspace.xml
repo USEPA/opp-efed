@@ -2,15 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="188a56b8-a3ad-4689-a049-3afe23591665" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/ScenarioSelection/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/.idea/aquatic-model-inputs.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/.idea/aquatic-model-inputs.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/1_scenarios_and_recipes.py" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/Code/1_scenarios_and_recipes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/append_hsg.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/modify.py" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/Code/modify.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/paths.py" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/Code/paths.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/Code/parameters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/read.py" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/Code/read.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/Code/utilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../aquatic-model-inputs/Code/write.py" beforeDir="false" afterPath="$PROJECT_DIR$/../aquatic-model-inputs/Code/write.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/Jhook.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/Jhook.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/pwc.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pwc.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ScenarioSelection/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/ScenarioSelection/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ScenarioSelection/paths.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScenarioSelection/paths.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ScenarioSelection/read_summary_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScenarioSelection/read_summary_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ScenarioSelection/read_summary_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/ScenarioSelection/pwc_postprocessor.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,7 +29,8 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/pwc$nelson_project.coverage" NAME="nelson_project Coverage Results" MODIFIED="1566391972976" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pwc$read_summary_file.coverage" NAME="read_summary_file Coverage Results" MODIFIED="1566825435736" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ScenarioSelection" />
+    <SUITE FILE_PATH="coverage/pwc$read_summary_file.coverage" NAME="read_summary_file Coverage Results" MODIFIED="1567099914842" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ScenarioSelection" />
+    <SUITE FILE_PATH="coverage/pwc$pwc_postprocessor.coverage" NAME="pwc_postprocessor Coverage Results" MODIFIED="1567099444849" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ScenarioSelection" />
     <SUITE FILE_PATH="coverage/pwc$random_selection.coverage" NAME="random_selection Coverage Results" MODIFIED="1559162716571" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ScenarioSelection" />
     <SUITE FILE_PATH="coverage/pwc$selection_frontend.coverage" NAME="selection_frontend Coverage Results" MODIFIED="1566591259191" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ScenarioSelection" />
     <SUITE FILE_PATH="coverage/pwc$sandbox.coverage" NAME="sandbox Coverage Results" MODIFIED="1566321048280" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ScenarioSelection" />
@@ -43,11 +53,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ScenarioSelection/read_summary_file.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1377">
-              <caret line="51" column="4" selection-start-line="51" selection-start-column="4" selection-end-line="51" selection-end-column="4" />
+            <state relative-caret-position="222">
+              <caret line="150" column="20" selection-start-line="150" selection-start-column="20" selection-end-line="150" selection-end-column="20" />
               <folding>
                 <element signature="e#158#167#0" expanded="true" />
               </folding>
@@ -56,10 +66,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ScenarioSelection/selection_frontend.py">
+        <entry file="file://$PROJECT_DIR$/ScenarioSelection/pwc_postprocessor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="663">
-              <caret line="39" column="49" selection-start-line="39" selection-start-column="49" selection-end-line="39" selection-end-column="49" />
+            <state relative-caret-position="205">
+              <caret line="102" column="20" lean-forward="true" selection-start-line="102" selection-start-column="20" selection-end-line="102" selection-end-column="20" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -67,14 +77,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ScenarioSelection/setup.py">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ScenarioSelection/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" column="40" selection-start-line="3" selection-start-column="40" selection-end-line="3" selection-end-column="40" />
-              <folding>
-                <element signature="e#0#32#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="85">
+              <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/AppData/Local/Continuum/anaconda3/Lib/tkinter/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="159">
+              <caret line="2261" selection-start-line="2261" selection-end-line="2261" />
             </state>
           </provider>
         </entry>
@@ -82,8 +98,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ScenarioSelection/paths.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="9" selection-start-line="8" selection-start-column="9" selection-end-line="8" selection-end-column="9" />
+            <state relative-caret-position="34">
+              <caret line="2" selection-start-line="2" selection-end-line="2" />
             </state>
           </provider>
         </entry>
@@ -107,7 +123,6 @@
       <find>hydro_group_</find>
       <find>hydro_group</find>
       <find>scenario_id_pwc</find>
-      <find>%ile</find>
       <find>split</find>
       <find>fuke</find>
       <find>\</find>
@@ -116,6 +131,10 @@
       <find>id_fields</find>
       <find>test_fields</find>
       <find>print(</find>
+      <find>exit</find>
+      <find>pct_field</find>
+      <find>weighted</find>
+      <find>%ile</find>
     </findStrings>
     <replaceStrings>
       <replace>auc</replace>
@@ -130,23 +149,24 @@
         <option value="$PROJECT_DIR$/ScenarioSelection/process_time_series.py" />
         <option value="$PROJECT_DIR$/ScenarioSelection/sandbox.py" />
         <option value="$PROJECT_DIR$/ScenarioSelection/Output/.gitignore" />
-        <option value="$PROJECT_DIR$/ScenarioSelection/.gitignore" />
         <option value="$PROJECT_DIR$/ScenarioSelection/Input/Samples/.gitignore" />
         <option value="$PROJECT_DIR$/nelson_project.py" />
         <option value="$PROJECT_DIR$/../aquatic-model-inputs/Code/nelson_project.py" />
         <option value="$PROJECT_DIR$/ScenarioSelection/gui_test.py" />
         <option value="$PROJECT_DIR$/ScenarioSelection/setup.py" />
-        <option value="$PROJECT_DIR$/ScenarioSelection/paths.py" />
         <option value="$PROJECT_DIR$/ScenarioSelection/selection_frontend.py" />
+        <option value="$PROJECT_DIR$/ScenarioSelection/paths.py" />
+        <option value="$PROJECT_DIR$/ScenarioSelection/pwc_postprocessor.py" />
         <option value="$PROJECT_DIR$/ScenarioSelection/read_summary_file.py" />
+        <option value="$PROJECT_DIR$/ScenarioSelection/.gitignore" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="405" />
-    <option name="y" value="45" />
-    <option name="width" value="1560" />
-    <option name="height" value="1103" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="1257" />
+    <option name="y" value="17" />
+    <option name="width" value="1294" />
+    <option name="height" value="974" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -154,7 +174,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -167,10 +186,37 @@
               <item name="pwc" type="462c0819:PsiDirectoryNode" />
               <item name="ScenarioSelection" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="pwc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pwc" type="462c0819:PsiDirectoryNode" />
+              <item name="ScenarioSelection" type="462c0819:PsiDirectoryNode" />
+              <item name="Input" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pwc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pwc" type="462c0819:PsiDirectoryNode" />
+              <item name="ScenarioSelection" type="462c0819:PsiDirectoryNode" />
+              <item name="Input" type="462c0819:PsiDirectoryNode" />
+              <item name="Samples" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pwc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pwc" type="462c0819:PsiDirectoryNode" />
+              <item name="ScenarioSelection" type="462c0819:PsiDirectoryNode" />
+              <item name="Output" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pwc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pwc" type="462c0819:PsiDirectoryNode" />
+              <item name="ScenarioSelection" type="462c0819:PsiDirectoryNode" />
+              <item name="Output" type="462c0819:PsiDirectoryNode" />
+              <item name="r01_Spring Wheat_summary_files" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -184,7 +230,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../aquatic-model-inputs" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -222,7 +268,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="J:\opp-efed\pwc\ScenarioSelection\read_summary_gui.py" />
+      <option name="SCRIPT_NAME" value="J:\opp-efed\pwc\ScenarioSelection\pwc_postprocessor.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -253,6 +299,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="pwc_postprocessor" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="pwc" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ScenarioSelection" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ScenarioSelection/pwc_postprocessor.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="read_summary_file" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pwc" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -275,28 +343,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="sandbox" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="pwc" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ScenarioSelection" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ScenarioSelection/sandbox.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="selection_frontend" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="pwc" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -310,7 +356,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="J:\opp-efed\pwc\ScenarioSelection\read_summary_gui.py" />
+      <option name="SCRIPT_NAME" value="J:\opp-efed\pwc\ScenarioSelection\pwc_postprocessor.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -323,16 +369,16 @@
       <item itemvalue="Python.gui_test" />
       <item itemvalue="Python.nelson_project" />
       <item itemvalue="Python.read_summary_file" />
-      <item itemvalue="Python.sandbox" />
       <item itemvalue="Python.selection_frontend" />
+      <item itemvalue="Python.pwc_postprocessor" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.read_summary_file" />
+        <item itemvalue="Python.pwc_postprocessor" />
         <item itemvalue="Python.selection_frontend" />
         <item itemvalue="Python.gui_test" />
         <item itemvalue="Python.nelson_project" />
-        <item itemvalue="Python.sandbox" />
       </list>
     </recent_temporary>
   </component>
@@ -368,23 +414,26 @@
       <workItem from="1566321740519" duration="9099000" />
       <workItem from="1566414703366" duration="17110000" />
       <workItem from="1566565150312" duration="26000" />
-      <workItem from="1566589821990" duration="3455000" />
+      <workItem from="1566589821990" duration="5366000" />
+      <workItem from="1566836378499" duration="2422000" />
+      <workItem from="1566915472273" duration="5350000" />
+      <workItem from="1567084819247" duration="11368000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="83683000" />
+    <option name="totallyTimeSpent" value="104734000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
+    <frame x="1262" y="14" width="1035" height="779" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1805668" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.30769232" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32930514" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.4973357" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.24729522" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39728096" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -402,7 +451,7 @@
       <window_info anchor="right" id="SciView" order="4" weight="0.36809817" />
       <window_info anchor="right" id="R Graphics" order="5" />
       <window_info anchor="right" id="R Packages" order="6" />
-      <window_info anchor="right" id="Database" order="7" weight="0.32924336" />
+      <window_info anchor="right" id="Database" order="7" weight="0.32874495" />
     </layout>
     <layout-to-restore>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1951417" />
@@ -434,6 +483,11 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$" />
+    </ignored-roots>
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/Output/test_table.csv" />
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/Dev/random_selection.py" />
@@ -453,6 +507,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/sandbox.py" />
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/Output/test_selection.csv">
+      <provider selected="true" editor-type-id="LargeFileEditor" />
       <provider editor-type-id="csv-table-editor">
         <state showInfoPanel="true" fixedHeaders="false" rowLines="3">
           <column index="0" width="100" />
@@ -469,7 +524,6 @@
           <column index="11" width="100" />
         </state>
       </provider>
-      <provider selected="true" editor-type-id="LargeFileEditor" />
       <provider editor-type-id="csv-text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/Output/.gitignore">
@@ -479,17 +533,8 @@
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/Input/Samples/.gitignore" />
-    <entry file="file://$PROJECT_DIR$/ScenarioSelection/Output/plot_1-day.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/ScenarioSelection/Output/plot_1-day.png" />
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/test.csv" />
-    <entry file="file://$PROJECT_DIR$/ScenarioSelection/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="22" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../aquatic-model-inputs/Code/nelson_project.py" />
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/process_time_series.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -501,40 +546,45 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/ScenarioSelection/setup.py" />
     <entry file="file://$PROJECT_DIR$/ScenarioSelection/paths.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="9" selection-start-line="8" selection-start-column="9" selection-end-line="8" selection-end-column="9" />
+        <state relative-caret-position="34">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ScenarioSelection/setup.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Continuum/anaconda3/Lib/tkinter/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="40" selection-start-line="3" selection-start-column="40" selection-end-line="3" selection-end-column="40" />
+        <state relative-caret-position="159">
+          <caret line="2261" selection-start-line="2261" selection-end-line="2261" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ScenarioSelection/read_summary_file.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="222">
+          <caret line="150" column="20" selection-start-line="150" selection-start-column="20" selection-end-line="150" selection-end-column="20" />
           <folding>
-            <element signature="e#0#32#0" expanded="true" />
+            <element signature="e#158#167#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ScenarioSelection/selection_frontend.py">
+    <entry file="file://$PROJECT_DIR$/ScenarioSelection/pwc_postprocessor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="663">
-          <caret line="39" column="49" selection-start-line="39" selection-start-column="49" selection-end-line="39" selection-end-column="49" />
+        <state relative-caret-position="205">
+          <caret line="102" column="20" lean-forward="true" selection-start-line="102" selection-start-column="20" selection-end-line="102" selection-end-column="20" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ScenarioSelection/read_summary_file.py">
+    <entry file="file://$PROJECT_DIR$/ScenarioSelection/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1377">
-          <caret line="51" column="4" selection-start-line="51" selection-start-column="4" selection-end-line="51" selection-end-column="4" />
-          <folding>
-            <element signature="e#158#167#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="85">
+          <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
         </state>
       </provider>
     </entry>

@@ -6,6 +6,8 @@
       <excludeFolder url="file://$MODULE_DIR$/ScenarioSelection/Input" />
       <excludeFolder url="file://$MODULE_DIR$/ScenarioSelection/Maps" />
       <excludeFolder url="file://$MODULE_DIR$/ScenarioSelection/Output" />
+      <excludeFolder url="file://$MODULE_DIR$/ScenarioSelection/build" />
+      <excludeFolder url="file://$MODULE_DIR$/ScenarioSelection/dist" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7 (pwc)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

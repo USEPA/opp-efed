@@ -12,7 +12,7 @@ def combinations(region, year):
     return pd.read_csv(combo_path.format(region, year))[['gridcode', 'cdl', 'weather_grid', 'mukey', 'area']]
 
 
-def crop_data():
+def crop():
     crop_params = pd.read_csv(crop_params_path)
     crop_dates = pd.read_csv(crop_dates_path)
     irrigation_data = pd.read_csv(irrigation_path).rename(columns={'cdl': 'cdl_alias'})

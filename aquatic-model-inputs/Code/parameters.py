@@ -17,8 +17,6 @@ hydro_soil_groups = ['A', 'A/D', 'B', 'B/D', 'C', 'C/D', 'D']
 hsg_cultivated = ['A', 'A', 'B', 'B', 'C', 'C', 'D']
 hsg_non_cultivated = ['A', 'D', 'B', 'D', 'C', 'D', 'D']
 
-# Curve number to use when curve number is missing
-null_curve_number = 99
 
 # USLEP (practices) values for aggregation based on Table 4 in SAM Scenario Input Parameter documentation.
 # Original source: Table 5.6 in PRZM 3 Manual (Carousel et al, 2015).

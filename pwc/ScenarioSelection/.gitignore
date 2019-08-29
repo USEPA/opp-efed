@@ -3,6 +3,8 @@ Input/*
 Output/*
 Maps
 sandbox.py
+build
+dist
 
 !*/.gitignore
 !*/*/.gitignore

@@ -17,7 +17,6 @@ class FieldMatrix(object):
         self.extended_monthly = False
         self.depth_weighted = False
         self.horizons_expanded = False
-        self.double_crop = False
         self._qc_table = None
         self._convert = None
 

@@ -12,8 +12,6 @@ from parameters import pwc_selection_pct as selection_pct
 from parameters import pwc_min_selection as min_sample
 
 
-# TODO - use fill value field for SAM scenarios
-
 def create_recipes(combinations, watershed_data):
     # Convert gridcode to comid
     combinations = combinations.merge(watershed_data, on='gridcode').sort_values('comid')
@@ -63,7 +61,6 @@ def select_pwc_scenarios(in_scenarios, crop_data):
 
 
 def update_combinations(all_combos, new_combos):
-
     del new_combos['gridcode']
 
     # Append new scenarios to running list
@@ -75,25 +72,24 @@ def update_combinations(all_combos, new_combos):
     return all_combos
 
 
-def scenarios_and_recipes(regions, years, aggregate, exclude, depth_weight, mode):
+def scenarios_and_recipes(regions, years, mode):
     # Read data indexed to weather grid
     met_data = read.met()
 
     # Read data indexed to crop
-    crop_data = read.crop_data()
-    crop_data = modify.crop_data(crop_data)
+    crop_data = read.crop()
+    crop_data = modify.land_use(crop_data, mode)
 
     # Soils, watersheds and combinations are broken up by NHD region
     for region in regions:
         report("Processing Region {}...".format(region))
 
         # Read data indexed to watershed
-        if mode == 'sam':
-            watershed_data = read.nhd_params(region)
+        watershed_data = read.nhd_params(region) if mode == 'sam' else None
 
         # Read data indexed to soil and process
         soil_data = read.soils(region)
-        soil_data, aggregation_key = modify.soils(soil_data, aggregate, depth_weight)
+        soil_data, aggregation_key = modify.soils(soil_data, mode)
 
         # Initialize combinations for all years
         all_combinations = None
@@ -103,19 +99,20 @@ def scenarios_and_recipes(regions, years, aggregate, exclude, depth_weight, mode
             # Read met/crop/land cover/soil/watershed combinations and process
             combinations = read.combinations(region, year)
             combinations = \
-                modify.combinations(combinations, crop_data, soil_data, met_data, exclude, aggregation_key)
+                modify.combinations(combinations, crop_data, soil_data, met_data, mode, aggregation_key)
 
             # If running in SAM mode, create recipes and yearly scenarios
             if mode == 'sam':
                 report("Building recipes...", 2)
-                recipes, recipe_map, combinations = \
-                    create_recipes(combinations, watershed_data)
+                recipes, recipe_map, combinations = create_recipes(combinations, watershed_data)
                 write.recipes(region, year, recipes, recipe_map)
             all_combinations = update_combinations(all_combinations, combinations)
 
         # Join combinations with data tables and perform additional attribution
         scenarios = create_scenarios(all_combinations, soil_data, crop_data, met_data)
-        scenarios = modify.scenarios(scenarios, exclude, depth_weight, mode, region)
+        scenarios = modify.scenarios(scenarios, mode, region)
+
+        # Write scenarios to file
         if mode == 'pwc':
             for crop_name, crop_scenarios in select_pwc_scenarios(scenarios, crop_data):
                 report("Creating table for Region {} {}...".format(region, crop_name), 1)
@@ -125,15 +122,13 @@ def scenarios_and_recipes(regions, years, aggregate, exclude, depth_weight, mode
 
 
 def main():
-    modes = ('pwc',)  # pwc and/or sam
-    years = range(2013, 2018)
+    modes = ('sam',)  # pwc and/or sam
+    years = range(2013, 2015)
     regions = nhd_regions
 
     for mode in modes:
         # Automatically adjust run parameters for pwc or sam
-        aggregate = depth_weight = (mode == 'sam')
-        exclude = (mode == 'pwc')
-        scenarios_and_recipes(regions, years, aggregate, exclude, depth_weight, mode)
+        scenarios_and_recipes(regions, years, mode)
 
 
 if __name__ == "__main__":
