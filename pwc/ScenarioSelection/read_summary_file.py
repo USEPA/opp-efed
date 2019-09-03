@@ -61,9 +61,10 @@ def plot_selection(scenarios, selection, plot_outfile):
 
 
 def read_pwc_output(in_file):
+    print(in_file)
     # Read the table, manually entering in the header (original header is tough to parse)
     table = pd.read_csv(in_file, names=pwc_header, delimiter=r'\s+')
-
+    print(table)
     # Adjust line number by 2 so that header is not included
     table['line_num'] -= 1
 
@@ -108,17 +109,18 @@ def select_scenarios(scenarios, selection_pcts, window):
 
 def initialize_output(pwc_infile, output_path, weighted):
     scenario_file = os.path.basename(pwc_infile)
-    file_format = re.compile('(r[\dNSEWUL]{2,3})_\d{2,3}_([A-Za-z\s]+?)_')
+    file_format = re.compile('(r[\dNSEWUL]{1,3})_\d{1,3}_([A-Za-z\s]+?)_')
     try:
         region, crop = re.match(file_format, scenario_file).groups()
         results_dir = os.path.join(output_path, "{}_{}_summary_files".format(region, crop))
+        tag = "{}_{}{}_".format(region, crop, "_unweighted" if not weighted else "")
     except AttributeError:
         print("Can't read region or crop from '{}'".format(scenario_file))
         results_dir = os.path.join(output_path, "pwc_output_summary_files")
+        tag = ""
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
-    tag = "{}_{}{}_".format(region, crop, "_unweighted" if not weighted else "")
     return [os.path.join(results_dir, tag + t) for t in ['summary.csv', 'selected.csv', '{}.png']]
 
 
@@ -147,7 +149,7 @@ def main(pwc_infile, pwc_outfile, output_path, selection_pcts, window, weighted=
 if __name__ == "__main__":
     # Paths
     pwc_summary_file = r"J:\opp-efed\pwc\ScenarioSelection\Input\Samples\BatchOutputVVWM.txt"  # the table used as input for the pwc run
-    pwc_batch_file = r"J:\opp-efed\pwc\ScenarioSelection\Input\Samples\r01_23_Spring Wheat_100.csv"  # the output file from the pwc run
+    pwc_batch_file = r"J:\opp-efed\pwc\ScenarioSelection\Input\Samples\r1_1_Corn_fix.csv"  # the output file from the pwc run
     output_dir = "Output"
     selection_percentiles = [50, 75, 90, 95]  # percentile for selection
     selection_window = 0.1  # select scenarios within a range
