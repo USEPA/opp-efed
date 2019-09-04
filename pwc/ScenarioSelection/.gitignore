@@ -11,4 +11,4 @@ sandbox.py
 
 build
 dist
-*.spec
+pwc_postprocessor.spec
