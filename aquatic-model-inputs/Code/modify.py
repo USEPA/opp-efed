@@ -12,6 +12,7 @@ def aggregate_soils(in_soils):
     from parameters import aggregation_bins
 
     # Sort data into bins
+    # group by hsg
     out_data = [in_soils.hsg_letter, in_soils.state]
     for field, field_bins in aggregation_bins.items():
         # Designate aggregated field labels (e.g., sl1, sl2 for slope) and apply with 'cut'
@@ -26,27 +27,40 @@ def aggregate_soils(in_soils):
     in_soils.loc[~invalid, 'soil_id'] = soil_agg['state'] + soil_agg['hsg_letter'] + soil_agg['slope'] + soil_agg[
         'orgC_5'] + soil_agg['sand_5'] + soil_agg['clay_5']
 
-    aggregation_key = in_soils[['mukey', 'soil_id', 'state']]
+    aggregation_key = in_soils[['mukey', 'state', 'soil_id']]
 
-    del in_soils['mukey']
+    # Identify fields for averaging
+    id_fields = {'soil_id', 'index'}
+
+    average_me = {'bd_5', 'fc_5', 'wp_5', 'orgC_5', 'sand_5', 'clay_5', 'pH_5', 'usle_k_5', 'bd_20', 'fc_20',
+                  'wp_20', 'orgC_20', 'sand_20', 'clay_20', 'pH_20', 'usle_k_20', 'bd_50', 'fc_50',
+                  'wp_50', 'orgC_50', 'sand_50', 'clay_50', 'pH_50', 'usle_k_50', 'bd_100',
+                  'fc_100', 'wp_100', 'orgC_100', 'sand_100', 'clay_100', 'pH_100', 'usle_k_100', 'slope',
+                  'usle_ls', 'root_zone_max', }
+
+    not_needed = {'slope_length', 'component_pct', 'n_horizons', 'mukey', 'cokey'}
 
     # Group by aggregation key and take the mean of all properties except HSG, which will use mode
     grouped = in_soils.groupby('soil_id')
     averaged = grouped.mean().reset_index()
     hydro_group = grouped['hydro_group'].agg(lambda x: stats.mode(x)[0][0]).to_frame().reset_index()
     del averaged['hydro_group']
-    in_soils = averaged.merge(hydro_group, on='soil_id')
+    print(1, in_soils.columns.values)
+    print(2, averaged.columns.values)
+    print(3, hydro_group.columns.values)
+    in_soils = aggregation_key.merge(averaged, on='soil_id', how='left').merge(hydro_group, on='soil_id')
+    print(in_soils.columns.values)
+    return in_soils
 
-    return in_soils, aggregation_key
 
-
-def combinations(combos, crop_data, soil_data, met_data, mode, aggregation_key):
+def combinations(combos, crop_data, soil_data, met_data, mode):
     # Split double-cropped classes into individual scenarios
     double_crops = crop_data[['cdl', 'cdl_alias']].drop_duplicates().sort_values('cdl')
     combos = combos.merge(double_crops, on='cdl', how='left')
 
     # Modify soil id for aggregated scenarios
-    if aggregation_key is not None:
+    if mode == 'sam':
+        aggregation_key = soil_data[['mukey', 'soil_id', 'state']]
         combos = combos.merge(aggregation_key, on='mukey', how="left")
         del combos['mukey']
         id_columns = [c for c in combos.columns if c != "area"]
@@ -54,7 +68,7 @@ def combinations(combos, crop_data, soil_data, met_data, mode, aggregation_key):
     else:
         combos = combos.rename(columns={'mukey': 'soil_id'})
 
-    # Scenarios are only selected for PWC where data is complete (not needed but improves processing time)
+    #  Scenarios are only selected for PWC where data is complete (not needed but improves processing time)
     if mode == 'pwc':
         combos = combos.merge(soil_data[['soil_id', 'state']], on='soil_id', how='inner')
         available_crops = crop_data.dropna(subset=fields.fetch('CropDates'), how='all')[['cdl', 'cdl_alias', 'state']]
@@ -74,6 +88,7 @@ def combinations(combos, crop_data, soil_data, met_data, mode, aggregation_key):
 
 def depth_weight_soils(in_soils):
     # Get the root name of depth weighted fields
+    fields.refresh()
     depth_fields = fields.fetch('depth_weight')
 
     # Generate weighted columns for each bin
@@ -245,12 +260,11 @@ def soils(in_soils, mode):
         in_soils.loc[pd.isnull(in_soils.slope_length), 'slope_length'] = slope_length_max
         in_soils.loc[in_soils.slope < slope_min, 'slope'] = slope_min
         in_soils = in_soils.rename(columns={'mukey': 'soil_id'})
-        aggregation_key = None
     else:
         in_soils = depth_weight_soils(in_soils)
-        in_soils, aggregation_key = aggregate_soils(in_soils)
+        in_soils = aggregate_soils(in_soils)
 
-    return in_soils, aggregation_key
+    return in_soils
 
 
 if __name__ == "__main__":

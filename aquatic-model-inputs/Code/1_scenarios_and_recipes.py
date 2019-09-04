@@ -89,7 +89,7 @@ def scenarios_and_recipes(regions, years, mode):
 
         # Read data indexed to soil and process
         soil_data = read.soils(region)
-        soil_data, aggregation_key = modify.soils(soil_data, mode)
+        soil_data = modify.soils(soil_data, mode)
 
         # Initialize combinations for all years
         all_combinations = None
@@ -99,7 +99,7 @@ def scenarios_and_recipes(regions, years, mode):
             # Read met/crop/land cover/soil/watershed combinations and process
             combinations = read.combinations(region, year)
             combinations = \
-                modify.combinations(combinations, crop_data, soil_data, met_data, mode, aggregation_key)
+                modify.combinations(combinations, crop_data, soil_data, met_data, mode)
 
             # If running in SAM mode, create recipes and yearly scenarios
             if mode == 'sam':

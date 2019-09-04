@@ -7,6 +7,7 @@ import re
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import itertools
 
 # This silences some error messages being raised by Pandas
@@ -40,31 +41,47 @@ def compute_percentiles(scenario_table, weighted):
 
 
 def plot_selection(scenarios, selection, plot_outfile):
+    def initialize(plot, label):
+        plt.figure(plot)
+        plt.xlabel('Concentration (μg/L)', fontsize=12)
+        plt.ylabel('Percentile', fontsize=12)
+        axis = plt.gca()
+        axis.set_label(label)
+
+    def write(f, clear=True):
+        plt.legend(loc='upper left')
+        plt.savefig(plot_outfile.format(f), dpi=600)
+        if clear:
+            plt.clf()
+
+    hsg_colors = np.array(['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'])
+    combined_colors = np.array(['red', 'green', 'blue'])
     outfiles = []
-    for field in pwc_durations:
-        colors = np.array(['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'])
-        fig, ax1 = plt.subplots()
+    initialize("Combined", "Threshold")
+    for i, field in enumerate(pwc_durations):
+        initialize("Individual", "Soil Group")
+        print(field)
         for group in sorted(scenarios.hydro_group.unique())[::-1]:
             sel = scenarios[scenarios.hydro_group == group]
             concentrations, percentiles = sel[[field, percentile_field.format(field)]].values.T
-            ax1.scatter(concentrations, percentiles, s=10, c=colors[group - 1], label=hydro_groups[group - 1])
+            plt.scatter(concentrations, percentiles, s=10, c=hsg_colors[group - 1], label=hydro_groups[group - 1])
         concentrations, percentiles, hsg = \
             selection.loc[selection.duration == field, ['concentration', 'percentile', 'hydro_group']].values.T
-        ax1.set_label('Soil Group')
-        plt.xlabel('Concentration (μg/L)', fontsize=12)
-        plt.ylabel('Percentile', fontsize=12)
-        plt.legend(loc='upper left')
-        ax1.scatter(concentrations, percentiles, s=100, c=colors[hsg.astype(np.int8) - 1], label="Selected")
-        plt.savefig(plot_outfile.format(field), dpi=600)
+        plt.scatter(concentrations, percentiles, s=100, c=hsg_colors[hsg.astype(np.int8) - 1], label="Selected")
+        write(field, True)
         outfiles.append(plot_outfile.format(field))
+        plt.figure("Combined")
+        concentrations, percentiles = scenarios[[field, percentile_field.format(field)]].values.T
+        plt.scatter(concentrations, percentiles, s=10, c=combined_colors[i], label=field.capitalize())
+    plt.figure("Combined")
+    write("combined")
     return outfiles
 
 
 def read_pwc_output(in_file):
-    print(in_file)
     # Read the table, manually entering in the header (original header is tough to parse)
     table = pd.read_csv(in_file, names=pwc_header, delimiter=r'\s+')
-    print(table)
+
     # Adjust line number by 2 so that header is not included
     table['line_num'] -= 1
 
@@ -121,7 +138,7 @@ def initialize_output(pwc_infile, output_path, weighted):
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
-    return [os.path.join(results_dir, tag + t) for t in ['summary.csv', 'selected.csv', '{}.png']]
+    return [os.path.join(results_dir, tag + t) for t in ['summary.csv', 'selected.csv', '{}']]
 
 
 def main(pwc_infile, pwc_outfile, output_path, selection_pcts, window, weighted=True):

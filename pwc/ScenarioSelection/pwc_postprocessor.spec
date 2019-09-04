@@ -24,9 +24,9 @@ exe = EXE(pyz,
           name='pwc_postprocessor',
           debug=False,
           bootloader_ignore_signals=False,
-          strip=False,
+          strip=True,
           upx=True,
-          console=True )
+          console=False )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

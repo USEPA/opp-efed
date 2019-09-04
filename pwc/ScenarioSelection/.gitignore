@@ -3,10 +3,12 @@ Input/*
 Output/*
 Maps
 sandbox.py
-build
-dist
 
 !*/.gitignore
 !*/*/.gitignore
 **/.idea/workspace.xml
 **/.idea/tasks.xml
+
+build
+dist
+*.spec
