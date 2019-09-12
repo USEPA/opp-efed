@@ -2,7 +2,7 @@ import os
 import time
 from tkinter import *
 from tkinter import filedialog
-import read_summary_file
+import single_postprocessor
 
 project_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,6 +26,20 @@ class TextEntry(object):
     def value(self):
         out_val = self.entry.get()
         return out_val
+
+
+class PathEntry(TextEntry):
+    def __init__(self, label="", width=100, sticky='w', directory=False, ext=None, default=None):
+        super(PathEntry, self).__init__(label, width, sticky, default)
+        self.button = Button(window, text="Browse", command=lambda: self.browse(directory, ext))
+        self.button.grid(column=1, row=row - 9, padx=0)
+
+    def browse(self, directory, ext):
+        if directory:
+            path = filedialog.askdirectory(initialdir=project_path, defaultextension=ext)
+        else:
+            path = filedialog.askopenfilename(initialdir=project_path)
+        self.update(path)
 
 
 class PathEntry(TextEntry):
@@ -84,7 +98,7 @@ class SubmitButton(object):
 
     def run(self):
         start = time.time()
-        outfiles = read_summary_file.main(
+        outfiles = single_postprocessor.main(
             *[f.value for f in (scenario_input, pwc_output, output_dir, sel_pcts, sel_window)])
         run_time = time.time() - start
         msg = "Successfully completed in {} seconds".format(int(run_time))
