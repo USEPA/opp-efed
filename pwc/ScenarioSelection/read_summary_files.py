@@ -49,6 +49,7 @@ def combine_tables(files):
     full_table = pd.concat(all_tables, axis=0)
     # TODO - there are rows with nan values... why?
     full_table = full_table.dropna()
+    full_table[scenario_id_field] = full_table[scenario_id_field].astype(object)
     return full_table
 
 
@@ -63,17 +64,6 @@ def compute_percentiles(scenarios, fields, area_weight=True):
             percentiles = ((scenarios.index + 1) / scenarios.shape[0]) * 100
         scenarios[percentile_field.format(field)] = percentiles
     return scenarios
-
-
-def detect_params(pwc_outfile):
-    pwc_outfile = os.path.basename(pwc_outfile)
-    pattern = re.compile("(r[\dNSEWUL]{1,3})_(\d{1,3})_([A-Za-z\s]+?)_[Kk]oc(\d{2,5})")
-    match = re.match(pattern, pwc_outfile)
-    try:
-        return match.groups()
-    except AttributeError:
-        print("Unable to parse region, cdl class and Koc from {}".format(pwc_outfile))
-        return '', '', ''
 
 
 def fetch_files():
@@ -107,29 +97,39 @@ def initialize_output(region=None, crop=None, koc=None):
         outfiles = ['summary.csv', 'selected.csv', '{}']
     else:
         tag = 'national_'
-        outfiles = ['{}_all_{}_']
+        outfiles = ['{}_{}_{}']  # type, duration, koc
     results_dir = os.path.join(output_dir, tag + "summary_files")
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
     return [os.path.join(results_dir, tag + t) for t in outfiles]
 
 
+def pivot_scenarios(scenarios, mode):
+    if mode == 'koc':
+        field1, field2 = 'koc', 'duration'
+    elif mode == 'duration':
+        field1, field2 = 'duration', 'koc'
+    else:
+        raise ValueError(f"Invalid mode '{mode}'")
+    root_table = scenarios.drop(columns=[field1, 'conc']).drop_duplicates()
+    local = scenarios[[scenario_id_field, field1, 'conc']]
+    # TODO - there are scenarios with duplicate values... why??
+    local = local.groupby([scenario_id_field, field1]).mean().reset_index()
+    local = local.pivot(index=scenario_id_field, columns=field1, values='conc').reset_index()
+    local = root_table.merge(local, on=scenario_id_field, how='left')
+    return local.dropna()  # TODO - there are rows with nan values... why?
+
+
 def national_analysis(table, field1, field2):
-    # TODO - crop needs to be specified here
+    # TODO - cdl class?
     plot_outfile = initialize_output()[0]
     table = table[[scenario_id_field, 'duration', 'koc', 'conc', 'area']]
     fields = sorted(table[field2].unique())
-    scenario_areas = table[[scenario_id_field, 'area']].drop_duplicates()
     for selection_val, subset in table.groupby(field1):
-        # TODO - there are scenarios with duplicate values... why??
-        subset = subset.groupby([scenario_id_field, field2]).mean().reset_index()
-        subset = subset.pivot(index=scenario_id_field, columns=field2, values='conc')
-        subset = subset.merge(scenario_areas, on=scenario_id_field, how='left')
-        # TODO - there are rows with nan values... why?
-        subset = subset.dropna()
+        subset = pivot_scenarios(subset, field2)
         subset = compute_percentiles(subset, fields)
         plot(subset, fields, combined_label=field2.capitalize(), labels=fields,
-             plot_outfile=plot_outfile.format(selection_val, field2), xmax=120)
+             plot_outfile=plot_outfile.format('concs', selection_val, field2), xmax=120)
 
 
 def read_infiles(pwc_infile, pwc_outfile):
@@ -138,7 +138,8 @@ def read_infiles(pwc_infile, pwc_outfile):
     infiles = []
     for infile, read_function in ((pwc_infile, read_scenarios), (pwc_outfile, read_pwc_output)):
         try:
-            infiles.append(read_function(infile))
+            table = read_function(infile)
+            infiles.append(table)
         except TypeError:
             errors.append('File {} is invalid'.format(os.path.basename(infile)))
         except ValueError:
@@ -177,36 +178,42 @@ def read_scenarios(scenario_table):
     return scenarios
 
 
-def select_scenarios(scenarios, selection_pcts, window):
+def select_scenarios(scenarios, fields, method='window'):
     # Designate the lower and upper bounds for the percentile selection
-    window /= 2  # half below, half above
+    window = selection_window / 2  # half below, half above
     # Select scenarios for each of the durations and combine
     all_selected = []
-    for duration, selection_pct in itertools.product(pwc_durations, selection_pcts):
-        # Selects all scenarios within the window, or outside but with equal value
-        lower = scenarios[percentile_field.format(duration)] >= (selection_pct - window)
-        upper = scenarios[percentile_field.format(duration)] <= (selection_pct + window)
-        selected = scenarios[lower & upper]
-        min_val, max_val = selected[duration].min(), selected[duration].max()
-        selected = (scenarios[duration] >= min_val) & (scenarios[duration] <= max_val)
+    for conc_field, selection_pct in itertools.product(fields, selection_percentiles):
+        pct_field = percentile_field.format(conc_field)
+        if method == 'window':
+            # Selects all scenarios within the window, or outside but with equal value
+            selected = scenarios[(scenarios[pct_field] >= (selection_pct - window)) &
+                                 (scenarios[pct_field] <= (selection_pct + window))]
+            min_val, max_val = selected[pct_field].min(), selected[pct_field].max()
+            selection = scenarios[(scenarios[pct_field] >= min_val) & (scenarios[pct_field] <= max_val)]
+        elif method == 'nearest':
+            rank = (scenarios[pct_field] - selection_pct).abs().sort_values().index
+            selection = scenarios.loc[rank].iloc[0].to_frame().T
 
         # Set new fields
-        selection = scenarios[selected][scenario_fields]
+        rename = {conc_field: 'concentration', pct_field: 'percentile'}
+        selection = selection[scenario_fields + list(rename.keys())].rename(columns=rename)
+        for col in ['concentration', 'percentile']:
+            selection[col] = selection[col].astype(np.float32)
         selection['target'] = selection_pct
-        selection['duration'] = duration
-        selection['percentile'] = scenarios[selected][percentile_field.format(duration)]
-        selection['concentration'] = scenarios[selected][duration]
+        selection['subject'] = conc_field
         all_selected.append(selection)
 
-    all_selected = pd.concat(all_selected, axis=0)
+    all_selected = \
+        pd.concat(all_selected, axis=0).sort_values(['subject', 'area'], ascending=[True, False]).reset_index()
 
-    return all_selected.sort_values(['duration', 'area'], ascending=[True, False])
+    return all_selected
 
 
 def streamline_selection(selection):
     """ Ranges of selections don't plot well. Take the ones with the largest areas for plotting """
     selection = selection.reset_index()
-    selection = selection.loc[selection.groupby(['target', 'duration'])['area'].idxmax()]
+    selection = selection.loc[selection.groupby(['target', 'subject'])['area'].idxmax()]
     return selection
 
 
@@ -229,12 +236,15 @@ def plot(scenarios, fields, plot_outfile=None, selection=None, combined=True,
         if clear:
             plt.clf()
 
-    def overlay_selected():
+    def overlay_selected(label=True):
         sel_concentrations, sel_percentiles, sel_targets = \
-            selection.loc[selection.duration == field, ['concentration', 'percentile', 'target']].values.T
+            selection.loc[selection.subject == field, ['concentration', 'percentile', 'target']].values.T
         for x, y in zip(sel_concentrations, sel_targets):
             plt.axhline(y=y, ls="--", lw=1)
             plt.axvline(x=x, ls="--", lw=1)
+            if label:
+                plt.text(1.5, y, round(y, 1))
+                plt.text(x, 1.5, round(x, 1))
         plt.scatter(sel_concentrations, sel_percentiles, s=100, label=selection_label)
 
     outfiles = []
@@ -246,7 +256,7 @@ def plot(scenarios, fields, plot_outfile=None, selection=None, combined=True,
             label = labels[i] if labels is not None else None
             plt.scatter(concentrations, percentiles, s=1, label=label)
             if selection is not None:
-                overlay_selected()
+                overlay_selected(False)
         else:
             initialize(individual_label, scenarios[[field]])
             plt.scatter(concentrations, percentiles, s=1, label=labels)
@@ -260,70 +270,99 @@ def plot(scenarios, fields, plot_outfile=None, selection=None, combined=True,
     return outfiles
 
 
-def process_single(scenarios=None, pwc_infile=None, pwc_outfile=None, region=None, crop=None, koc=None):
-    if not all((region, crop, koc)):
-        region, crop_id, crop, koc = detect_params(pwc_outfile)
-
-    if scenarios is None:
-        if all((pwc_infile, pwc_outfile)):
-            scenarios = read_infiles(pwc_infile, pwc_outfile)
-        else:
-            raise ValueError("Scenario and PWC outfiles not specified")
-
+def report_single(scenarios, region, crop, koc):
     summary_outfile, selected_scenario_outfile, plot_outfile = \
         initialize_output(region, crop, koc)
 
     # Calculate percentiles for test fields and append additional attributes
     scenarios = compute_percentiles(scenarios, pwc_durations, area_weighting)
-    scenarios.to_csv(summary_outfile, index=None)
 
     # Select scenarios for each duration based on percentile, and write to file
-    selection = select_scenarios(scenarios, selection_percentiles, selection_window)
+    selection = select_scenarios(scenarios, pwc_durations, method='window')
+
+    # Write to files
+    scenarios.to_csv(summary_outfile, index=None)
     selection.to_csv(selected_scenario_outfile, index=None)
-    selection = streamline_selection(selection)
 
     # Plot results and save tabular data to file
-    outfiles = plot(scenarios, pwc_durations, plot_outfile, selection, labels='Scenarios', selection_label='Selected',
+    selection = streamline_selection(selection)
+    outfiles = plot(scenarios, pwc_durations, plot_outfile, selection, labels='Scenarios', selection_label='Percentile',
                     combined=False)
     outfiles += plot(scenarios, pwc_durations, plot_outfile, selection, labels=pwc_durations)
 
     return [summary_outfile, selected_scenario_outfile] + outfiles
 
 
-def process_singles(full_table):
-    all_combinations = \
-        full_table[['cdl_name', 'cdl', 'region', 'koc']].drop_duplicates().sort_values(['cdl', 'region', 'koc']).values
+def batch_singles(scenarios):
+    for (cdl_name, cdl, region, koc), local_scenarios in scenarios.groupby(['cdl_name', 'cdl', 'region', 'koc']):
+        print(f"Working on {region} {koc}...")
+        local_scenarios = pivot_scenarios(local_scenarios, 'duration')
+        report_single(local_scenarios, region=region, crop=cdl_name, koc=koc)
 
-    durations = full_table[[scenario_id_field, 'duration', 'koc', 'conc', 'area']]
-    ## TODO - there are scenarios with duplicate values... why??
-    durations = durations.groupby([scenario_id_field, 'duration']).mean().reset_index()
-    durations = durations.pivot(index=scenario_id_field, columns='duration', values='conc')
-    scenarios = full_table.merge(durations, on=scenario_id_field, how='left')
-    # TODO - there are rows with nan values... why?
-    scenarios = scenarios.dropna()
 
-    for cdl_name, cdl, region, koc in all_combinations:
-        print(f"Working on Region {region} {cdl_name}, Koc {koc}")
-        local_scenarios = scenarios[(scenarios.cdl == cdl) & (scenarios.region == region) & (scenarios.koc == koc)]
-        try:
-            process_single(local_scenarios, region=region, crop=cdl_name, koc=koc)
-        except Exception as e:
-            print(e)
+def get_ratios(full_table):
+    out_path = initialize_output()[0]
+    regions = sorted(full_table.region.unique())
+    all_tables = []
+    for region, koc in itertools.product(regions, kocs):
+        print(region)
+        regional_table = full_table[(full_table.region == region) & (full_table.koc == str(koc))]
+        print(regional_table.empty)
+        if regional_table.empty:
+            print("yea no")
+            continue
+        regional_table = pivot_scenarios(regional_table, 'duration')
+        regional_table = compute_percentiles(regional_table, pwc_durations)
+        selection = select_scenarios(regional_table, pwc_durations, method='nearest')
+        selection = selection.groupby(['subject', 'target']).mean().reset_index()
+        selection = selection.pivot(index='subject', columns='target', values='concentration')
+        for pct in map(int, selection_percentiles[1:]):
+            try:
+                selection[f'r_{pct}/50'] = selection[pct] / selection[50]
+            except KeyError:
+                print(f"No scenarios found for {region} {koc}")
+        selection['region'] = region
+        selection['koc'] = koc
+        all_tables.append(selection)
+    ratio_table = pd.concat(all_tables, axis=0).reset_index()
+    ratio_table.to_csv(out_path.format('ratios', 'all', '_all') + ".csv", index=None)
 
-def process_batch():
+    # Plot output
+    regions = [''] + sorted(ratio_table.region.unique())
+    region_labels = [r.lstrip("r") for r in regions]
+    for koc, duration in itertools.product(kocs, pwc_durations):
+        table = ratio_table[(ratio_table.subject == duration) & (ratio_table.koc == koc)]
+        plt.xlabel('Region', fontsize=12)
+        plt.ylabel('Concentration (μg/L)', fontsize=12)
+        plt.xticks(range(len(regions)), region_labels, size='small')
+        plt.xlim([0, 22])
+        region_index = np.array([regions.index(r) for r in table.region])
+        for pct in selection_percentiles:
+            plt.scatter(region_index, table[pct], s=10, label=pct)
+        plt.legend(loc='best', title='Percentiles')
+        plt.savefig(out_path.format('ratios', duration, koc), dpi=600)
+        plt.clf()
+
+
+def main():
+    import time
+    start = time.time()
     # Find and categorize all input files
     file_map = fetch_files()
 
     # Read all tables into a single table
     full_table = combine_tables(file_map)
 
+    # Get ratios
+    get_ratios(full_table)
+
     # Plot national data by Koc and duration
-    # Get output path for plots
     national_analysis(full_table, 'koc', 'duration')
     national_analysis(full_table, 'duration', 'koc')
-
+    # exit()
     # Break down data by region/crop/koc
-    process_singles(full_table)
+    batch_singles(full_table)
+    print(time.time() - start)
 
-
-process_batch()
+if __name__ == "__main__":
+    main()
