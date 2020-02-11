@@ -8,8 +8,12 @@ from paths import condensed_soil_path, nhd_path, met_attributes_path, combo_path
 from utilities import fields, read_dbf, report
 
 
-def combinations(region, year):
-    return pd.read_csv(combo_path.format(region, year))[['gridcode', 'cdl', 'weather_grid', 'mukey', 'area']]
+def combinations(region, year, mode):
+    if mode == 'sam':
+        out_header = ['gridcode', 'cdl', 'weather_grid', 'mukey', 'area']
+    else:
+        out_header = ['cdl', 'weather_grid', 'mukey', 'area']
+    return pd.read_csv(combo_path.format(region, year))[out_header]
 
 
 def crop():

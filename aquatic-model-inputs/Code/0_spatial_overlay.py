@@ -7,7 +7,7 @@ from utilities import report
 from parameters import vpus_nhd, nhd_regions
 import time
 
-from paths import nhd_raster_path, soil_raster_path, weather_path, cdl_path, combo_path, combined_raster_path
+from paths import soil_raster_path, weather_path, cdl_path, combo_path, combined_raster_path
 
 
 def overlay_rasters(outfile, *rasters):
@@ -59,7 +59,6 @@ def main():
         # Iterate through year/region combinations
     regions = nhd_regions
     for region in regions:
-        nhd_raster = nhd_raster_path.format(vpus_nhd[region], region)
         soil_raster = soil_raster_path.format(region)
         weather_raster = weather_path.format(region) + ".tif"
         for year in years:
@@ -68,11 +67,11 @@ def main():
             combinations_table = combo_path.format(region, year)
             if overwrite_rasters or not os.path.exists(combined_raster):
                 try:
-                    if all(map(os.path.exists, (nhd_raster, soil_raster, weather_raster, cdl_raster))):
+                    if all(map(os.path.exists, (soil_raster, weather_raster, cdl_raster))):
                         report("Performing raster overlay for Region {}, {}...".format(region, year))
                         overlay_rasters(combined_raster, soil_raster, cdl_raster, weather_raster, nhd_raster)
                     else:
-                        paths = [('nhd', nhd_raster), ('soil', soil_raster),
+                        paths = [('soil', soil_raster),
                                  ('weather', weather_raster), ('cdl', cdl_raster)]
                         missing = ", ".join([name for name, path in paths if not os.path.exists(path)])
                         report("Missing {} layers for Region {}, {}".format(missing, region, year))

@@ -61,7 +61,8 @@ def select_pwc_scenarios(in_scenarios, crop_data):
 
 
 def update_combinations(all_combos, new_combos):
-    del new_combos['gridcode']
+    if 'gridcode' in new_combos.columns.values:
+        del new_combos['gridcode']
 
     # Append new scenarios to running list
     all_combos = pd.concat([all_combos, new_combos], axis=0) if all_combos is not None else new_combos
@@ -97,7 +98,7 @@ def scenarios_and_recipes(regions, years, mode):
             report("Reading combos for {}...".format(year), 1)
 
             # Read met/crop/land cover/soil/watershed combinations and process
-            combinations = read.combinations(region, year)
+            combinations = read.combinations(region, year, mode)
             combinations = \
                 modify.combinations(combinations, crop_data, soil_data, met_data, mode)
 
@@ -123,7 +124,7 @@ def scenarios_and_recipes(regions, years, mode):
 
 def main():
     modes = ('sam',)  # pwc and/or sam
-    years = range(2013, 2015)
+    years = range(2013, 2018)
     regions = nhd_regions
 
     for mode in modes:
