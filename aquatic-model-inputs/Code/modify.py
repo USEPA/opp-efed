@@ -231,7 +231,7 @@ def soils(in_soils, mode):
 
     # Calculate USLE variables
     # Take the value from the top horizon with valid kwfact values
-    in_soils['usle_k'] = in_soils[["usle_k_{}".format(i + 1) for i in range(max_horizons)]].bfill(1).iloc[:, 0]
+    in_soils['usle_k'] = in_soils[["usle_k_horiz_{}".format(i + 1) for i in range(max_horizons)]].bfill(1).iloc[:, 0]
     m = usle_m_vals[np.int16(pd.cut(in_soils.slope.values, usle_m_bins, labels=False))]
     sine_theta = np.sin(np.arctan(in_soils.slope / 100))  # % -> sin(rad)
     in_soils['usle_ls'] = (in_soils.slope_length / 72.6) ** m * (65.41 * sine_theta ** 2. + 4.56 * sine_theta + 0.065)

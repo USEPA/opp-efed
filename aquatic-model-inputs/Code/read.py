@@ -30,7 +30,7 @@ def crop():
     data = data[[c for c in data.columns if not c.endswith("_burn")]]
 
     # Convert to dates
-    for field in fields.fetch('CropDates'):
+    for field in set(fields.fetch('CropDates')) - set(fields.fetch('id')):
         data[field] = (pd.to_datetime(data[field], format="%d-%b") - pd.to_datetime("1900-01-01")).dt.days
 
     # Where harvest is before plant, add 365 days (e.g. winter wheat)

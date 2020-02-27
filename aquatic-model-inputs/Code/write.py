@@ -29,13 +29,13 @@ def recipes(region, year, recipe_matrix, recipe_map):
 
 def qc_report(in_scenarios, qc_table, qc_fields, region, mode):
     # Initialize a table with all violations for each scenario
-    violation_table = in_scenarios[fields.fetch('id')]
+    violation_table = in_scenarios[[f for f in fields.fetch('id') if f in in_scenarios.columns]]
 
     # Initialize a report with violations by field
     field_report = [['n scenarios', in_scenarios.shape[0]]]
 
     # Iterate through fields and test for violations
-    for field in qc_fields:
+    for field in qc_table.columns:
         violation_table[field] = 0
         bogeys = np.where(qc_table[field] > 2)[0]
         if bogeys.sum() > 0:

@@ -1,9 +1,11 @@
 import os
 
 # Root directories
-root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, "bin"))
+#root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, "bin"))
+root_dir = r"J:\opp-efed-data\aquatic-model-inputs\bin"
 table_dir = os.path.join(root_dir, "Tables")
-input_dir = os.path.join(root_dir, "Input")  # region
+#input_dir = os.path.join(root_dir, "Input")  # region
+input_dir = r"J:\NationalData"
 intermediate_dir = os.path.join(root_dir, "Intermediate")
 production_dir = os.path.join(root_dir, "Production")
 staged_dir = os.path.join(root_dir, "Staged")

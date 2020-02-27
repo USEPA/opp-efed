@@ -123,7 +123,7 @@ def scenarios_and_recipes(regions, years, mode):
 
 
 def main():
-    modes = ('sam',)  # pwc and/or sam
+    modes = ('pwc',)  # pwc and/or sam
     years = range(2013, 2018)
     regions = nhd_regions
 
@@ -131,6 +131,6 @@ def main():
         # Automatically adjust run parameters for pwc or sam
         scenarios_and_recipes(regions, years, mode)
 
-
+# Add 50 to cdl_alias in fields_and_qc.csv
 if __name__ == "__main__":
     main()
