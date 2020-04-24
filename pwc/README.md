@@ -1,2 +1,0 @@
-# pwc
-Pesticide Water Calculator
