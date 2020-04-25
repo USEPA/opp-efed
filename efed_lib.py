@@ -234,6 +234,8 @@ class FieldManager(object):
         :param mode: 'depth', 'horizon', or 'monthly'
         :param n_horizons: Optional parameter when specifying a number to expand to (int)
         """
+        if type(numbers) == int:
+            numbers = np.arange(numbers) + 1
 
         # Check to make sure it's only been extended once
         if not select_field in self.extended:
@@ -257,7 +259,7 @@ class FieldManager(object):
             # Record that the duplication has occurred
             self.extended.append(select_field)
 
-    def fetch(self, source, names_only=False, dtypes=False):
+    def fetch(self, source, names_only=True, dtypes=False, col=None):
         """
         Subset the FieldManager matrix (fields_and_qc.csv) based on the values in a given column, or a field group in
         the 'data_source' or 'source_table' columns. For example, fetch_field('sam_scenario', 'internal_name')
@@ -280,6 +282,8 @@ class FieldManager(object):
 
         # Check to see if provided 'col' value is a group in the
         # 'data_source' or 'source_table' columns in fields_and_qc.csv
+        col = self.name_col if col is None else col
+
         out_fields = None
         source_cols = sorted((c for c in self.matrix.columns if c.startswith("source_")))
         for column in source_cols:
@@ -293,13 +297,13 @@ class FieldManager(object):
                 out_fields = self.matrix[self.matrix[source] > 0]
                 if out_fields[source].max() > 1:  # field order is given
                     out_fields.loc[:, 'order'] = out_fields[source] + np.array(
-                        [extract_num(f) for f in out_fields[self.name_col]])
+                        [extract_num(f) for f in out_fields[col]])
                     out_fields = out_fields.sort_values('order')
         if out_fields is None:
             report("Unrecognized sub-table '{}'".format(source))
             return None
         if names_only:
-            out_fields = out_fields[self.name_col].tolist()
+            out_fields = out_fields[col].tolist()
         if dtypes:
             return out_fields, self.data_type(cols=out_fields)
         else:
@@ -331,8 +335,8 @@ class FieldManager(object):
         :return: QAQC table (df)
         """
         # Confine QC table to fields in other table
-        active_fields = {field for field in self.qc_table.index.values if field in other.columns.tolist()}
-        qc_table = self.qc_table.loc[active_fields]
+        active_fields = {field for field in self.qc_table().index.values if field in other.columns.tolist()}
+        qc_table = self.qc_table().loc[active_fields]
 
         # Flag missing data
         # Note - if this fails, check for fields with no flag or fill attributes
