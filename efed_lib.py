@@ -259,53 +259,31 @@ class FieldManager(object):
             # Record that the duplication has occurred
             self.extended.append(select_field)
 
-    def fetch(self, source, names_only=True, dtypes=False, col=None):
+    def fetch(self, source, dtypes=False, field_filter=None, index_field='internal_name'):
         """
-        Subset the FieldManager matrix (fields_and_qc.csv) based on the values in a given column, or a field group in
-        the 'data_source' or 'source_table' columns. For example, fetch_field('sam_scenario', 'internal_name')
-        would return all the fields with a value > 0 in the 'sam_scenario' column of fields_and_qc.csv, and
-        fetch_field('SSURGO') would return all the fields with 'SSURGO' in the 'data_source' column'.
+        Subset the FieldManager matrix (fields_and_qc.csv) based on the values in a given column
         If the numbers are ordered, the returned list of fields will be in the same order. The names_only parameter
         can be turned off to return all other fields (e.g., QAQC fields) from fields_and_qc.csv for the same subset.
         :param source: The column in fields_and_qc.csv used to make the selection (str)
-        :param field: The field values to return, usually 'internal_name' or 'external_name'
-        :param names_only: Return simply the selected field, or all fields (bool)
+        :param dtypes: Return the data types for each column (bool)
+        :param field_filter: Only return column names if they appear in the filter (iter)
         :return: Subset of the field matrix (df)
         """
 
-        def extract_num(field_name):
-            match = re.search("(\d{1,2})$", field_name)
-            if match:
-                return float(match.group(1)) / 100.
-            else:
-                return 0.
-
-        # Check to see if provided 'col' value is a group in the
-        # 'data_source' or 'source_table' columns in fields_and_qc.csv
-        col = self.name_col if col is None else col
-
-        out_fields = None
-        source_cols = sorted((c for c in self.matrix.columns if c.startswith("source_")))
-        for column in source_cols:
-            if source in self.matrix[column].values:
-                out_fields = self.matrix[self.matrix[column] == source]
-                break
-
-        # If 'col' not found, check to see if provided 'col' value corresponds to a column in fields_and_qc.csv
-        if out_fields is None:
-            if source in self.matrix.columns:
-                out_fields = self.matrix[self.matrix[source] > 0]
-                if out_fields[source].max() > 1:  # field order is given
-                    out_fields.loc[:, 'order'] = out_fields[source] + np.array(
-                        [extract_num(f) for f in out_fields[col]])
-                    out_fields = out_fields.sort_values('order')
-        if out_fields is None:
+        try:
+            out_fields = self.matrix[self.matrix[source] > 0]
+            if out_fields[source].max() > 0:
+                out_fields = out_fields.sort_values(source)[index_field].values
+            if field_filter is not None:
+                out_fields = [f for f in out_fields if f in field_filter]
+            data_type = self.data_type(cols=out_fields)
+        except KeyError as e:
+            raise e
             report("Unrecognized sub-table '{}'".format(source))
-            return None
-        if names_only:
-            out_fields = out_fields[col].tolist()
+            out_fields, data_type = None, None
+
         if dtypes:
-            return out_fields, self.data_type(cols=out_fields)
+            return out_fields, data_type
         else:
             return out_fields
 
@@ -359,7 +337,7 @@ class FieldManager(object):
 
         return qc_table
 
-    def fill_value(self):
+    def fill(self):
         """ Return the fill values for flagged data set in fields_and_qc.csv """
         return self.matrix.set_index(self.name_col).fill_value.dropna()
 
