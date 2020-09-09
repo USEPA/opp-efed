@@ -200,7 +200,7 @@ class FieldManager(object):
         self.path = path
         self.name_col = name_col
         self.matrix = None
-        self.extended = []
+        self.expanded_cols = []
         self.refresh()
         self._convert = None
 
@@ -226,60 +226,51 @@ class FieldManager(object):
             data_types = {key: val for key, val in data_types.items() if key in cols}
         return {key: eval(val) for key, val in data_types.items()}
 
-    def expand(self, select_field, numbers):
+    def expand(self, expand_col, numbers):
         """
         Certain fields are repeated during processing - for example, the streamflow (q) field becomes monthly
         flow (q_1, q_2...q_12), and soil parameters linked to soil horizon will have multiple values for a single
         scenario (e.g., sand_1, sand_2, sand_3). This function adds these extended fields to the FieldManager.
-        :param mode: 'depth', 'horizon', or 'monthly'
-        :param n_horizons: Optional parameter when specifying a number to expand to (int)
+        :param expand_col: Column in fields_and_qc.csv to expand from
+        :param numbers: Specify a number of expansions or a fixed set
         """
         if type(numbers) == int:
             numbers = np.arange(numbers) + 1
+        old_rows = self.matrix[(self.matrix[expand_col] == 0) | (np.isnan(self.matrix[expand_col]))]
+        new_rows = []
+        extend_rows = self.matrix[self.matrix[expand_col] > 0]
+        for i in numbers:
+            next_set = extend_rows.copy()
+            next_set[self.name_col] = next_set[self.name_col] + "_" + str(i)
+            if next_set['extension'].any():
+                report("Warning: fields have already been extended")
+            next_set['extension'] = i
+            new_rows.append(next_set)
+        new_rows = pd.concat(new_rows, axis=0)
+        self.matrix = pd.concat([old_rows, new_rows], axis=0)
 
-        # Check to make sure it's only been extended once
-        if not select_field in self.extended:
-            condition = select_field + '_extended'
-            # Find each row that applies, duplicate, and append to the matrix
-            self.matrix[condition] = 0
-            burn = self.matrix[condition].copy()
-            new_rows = []
-            for idx, row in self.matrix[self.matrix[select_field] == 1].iterrows():
-                burn.iloc[idx] = 1
-                for i in numbers:
-                    new_row = row.copy()
-                    new_row[self.name_col] = row[self.name_col] + "_" + str(i)
-                    new_row[condition] = 1
-                    new_rows.append(new_row)
-            new_rows = pd.concat(new_rows, axis=1).T
-
-            # Filter out the old rows and add new ones
-            self.matrix = pd.concat([self.matrix[~(burn == 1)], new_rows], axis=0)
-
-            # Record that the duplication has occurred
-            self.extended.append(select_field)
-
-    def fetch(self, source, dtypes=False, field_filter=None, index_field='internal_name'):
+    def fetch(self, from_col, dtypes=False, field_filter=None, index_field='internal_name'):
         """
         Subset the FieldManager matrix (fields_and_qc.csv) based on the values in a given column
         If the numbers are ordered, the returned list of fields will be in the same order. The names_only parameter
         can be turned off to return all other fields (e.g., QAQC fields) from fields_and_qc.csv for the same subset.
-        :param source: The column in fields_and_qc.csv used to make the selection (str)
+        :param from_col: The column in fields_and_qc.csv used to make the selection (str)
         :param dtypes: Return the data types for each column (bool)
         :param field_filter: Only return column names if they appear in the filter (iter)
         :return: Subset of the field matrix (df)
         """
 
         try:
-            out_fields = self.matrix[self.matrix[source] > 0]
-            if out_fields[source].max() > 0:
-                out_fields = out_fields.sort_values(source)[index_field].values
+            out_fields = self.matrix[self.matrix[from_col] > 0]
+            if out_fields[from_col].max() > 0:
+                out_fields = out_fields.sort_values([from_col, 'extension'])[index_field].values
             if field_filter is not None:
                 out_fields = [f for f in out_fields if f in field_filter]
+            out_fields = list(out_fields)
             data_type = self.data_type(cols=out_fields)
         except KeyError as e:
             raise e
-            report("Unrecognized sub-table '{}'".format(source))
+            report("Unrecognized sub-table '{}'".format(from_col))
             out_fields, data_type = None, None
 
         if dtypes:
@@ -346,7 +337,8 @@ class FieldManager(object):
         # Read the fields/QC matrix
         if self.path is not None:
             self.matrix = pd.read_csv(self.path)
-        self.extended = []
+        self.matrix['extension'] = 0
+        self.matrix['original_index'] = self.matrix.index
 
 
 def report(message, tabs=0):
