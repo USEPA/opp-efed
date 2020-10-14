@@ -4,73 +4,99 @@ import pandas as pd
 import numpy as np
 from collections import Iterable
 from tempfile import mkstemp
-
+import time
 
 class MemoryMatrix(object):
     """ A wrapper for NumPy 'memmap' functionality which allows the storage and recall of arrays from disk """
 
-    def __init__(self, dimensions, dtype=np.float32, path=None, existing=False, name='null', index_dim=0,
-                 verbose=False):
+    def __init__(self, dimensions, dtype=np.float32, path=None, existing=False, name='null', verbose=False,
+                 index_col=0, persistent_read=False, persistent_write=False, max_calls=500):
+        # TODO - right now, no capability to 'fetch' on any dimension other than the first
         self.dtype = dtype
         self.path = path
         self.existing = existing
         self.name = name
+        self.index_col = index_col
+        self.max_calls = max_calls
 
-        # Initialize dimensions of array
-        self.dimensions = tuple(np.array(d) if isinstance(d, Iterable) else d for d in dimensions)
-        self.labels = tuple(d if isinstance(d, Iterable) else None for d in self.dimensions)
-        self.shape = tuple(map(int, (d.size if isinstance(d, Iterable) else d for d in self.dimensions)))
-        self.index = self.labels[index_dim]
-
-        # Add an alias if it's called for
-        if self.index is not None:
-            self.lookup = {label: i for i, label in enumerate(self.index)}
-            self.aliased = True
-        else:
-            self.lookup = None
-            self.aliased = False
-
+        self.shape = []
+        self.labels = []
+        self.index = None
+        self.aliased = False
+        self.index_cols = None
+        for i, d in enumerate(dimensions):
+            if isinstance(d, Iterable):
+                if i == index_col:
+                    self.aliased = True
+                    self.index = dimensions[0]
+                    self.index_cols = pd.DataFrame({'alias': self.index, 'i': np.arange(len(self.index))}).set_index(
+                        'alias')
+                self.shape.append(len(d))
+            else:
+                self.shape.append(d)
+        self.shape = tuple(self.shape)
         self.initialize_array(verbose)
+        self.n_calls = 0
 
-    def alias_to_index(self, aliases, verbose=False):
-        found = None
-        if type(aliases) in (pd.Series, list, set, np.array, np.ndarray):
-            indices = np.array([self.lookup.get(alias, np.nan) for alias in aliases])
-            found = np.where(~np.isnan(indices))[0]
-            indices = indices[found]
-            if verbose and found.size != len(aliases):
-                missing = np.array(aliases)[~found]
-                report("Missing {} of {} needed indices from array {}".format(missing.size, len(aliases), self.name))
+        self.persistent_read = persistent_read
+        self.persistent_write = persistent_write
+        self._reader = None
+        self._writer = None
+
+        self.refresh()
+
+    def alias_to_index(self, aliases, remove_missing=False, return_missing=False, verbose=True):
+        singular = not isinstance(aliases, Iterable)
+        if singular:
+            aliases = [aliases]
+
+        result = self.index_cols.reindex(aliases).reset_index()
+        if any((remove_missing, return_missing)):
+            found = ~pd.isnull(result.i)
+            missing = result[~found].alias
+            if verbose and not missing.empty:
+                report(f"Missing {missing.shape[0]} values from {self.name} array")
+            if remove_missing:
+                result = result[found]
+        if verbose and result.empty:
+            report(f"No records found matching {aliases} in {self.name} array")
+        if singular:
+            result = result.astype(np.int32).iloc[0]
+        if return_missing:
+            return result, missing
         else:
-            indices = self.lookup.get(aliases)
-            if indices is None and verbose:
-                report("Alias {} not found in array {}".format(aliases, self.name), warn=2)
-                return None, None
-        return np.int32(indices), found
+            return result
 
-    def fetch(self, index, copy=False, verbose=False, return_found=False, iloc=False, pop=False):
-
-        # Initialize reader (with write capability in case of 'pop')
-        array = self.reader
-
-        # Convert aliased item(s) to indices if applicable
-        if self.aliased and not iloc:
-            index, found = self.alias_to_index(index, verbose)
-            if index is None:
-                return
-
-        # Extract data from array
-        output = array[index]
-
-        # Return a copy of the selection instead of a view if necessary
+    def read(self, index, pop=False, copy=False):
+        # Read from the array
+        reader = self.reader
+        output = reader[index]
         if pop or copy:
             output = np.array(output)
             if pop:  # Set the selected rows to zero after extracting array
-                array[index] = 0.
+                reader[index] = 0.
+        self.count_call()
+        return output
 
-        del array
-        if return_found:
-            return output, found
+    def count_call(self):
+        self.n_calls += 1
+        if self.n_calls >= self.max_calls:
+            self.refresh()
+
+    def get_index(self, index, iloc):
+        # Convert aliased item(s) to indices if applicable
+        if self.aliased and not iloc:
+            alias_lookup, missing = self.alias_to_index(index, True, True, verbose=True)
+            index = alias_lookup.i
+        else:
+            alias_lookup = None
+        return index, alias_lookup
+
+    def fetch(self, index, copy=False, verbose=False, iloc=False, pop=False, return_alias=False):
+        index, alias_lookup = self.get_index(index, iloc)
+        output = self.read(index, pop, copy)
+        if alias_lookup is not None and return_alias:
+            return output, alias_lookup
         else:
             return output
 
@@ -86,7 +112,6 @@ class MemoryMatrix(object):
                 self.path += ".dat"
             if os.path.exists(self.path):
                 self.existing = True
-
         if not self.existing:
             if verbose:
                 report("Creating memory map {}...".format(self.path))
@@ -94,23 +119,48 @@ class MemoryMatrix(object):
                 os.makedirs(os.path.dirname(self.path))
             except FileExistsError:
                 pass
-            np.memmap(self.path, dtype=self.dtype, mode='w+', shape=self.shape)  # Allocate memory
+            np.memmap(self.path, dtype=self.dtype, mode='w+', shape=tuple(self.shape))  # Allocate memory
 
-    def update(self, index, values, return_found=False, verbose=False, iloc=False):
+    def write(self, index, values):
         array = self.writer
-        if self.aliased and not iloc:
-            index = self.alias_to_index(index, verbose)
         array[index] = values
-        del array
+        self.count_call()
+
+    def update(self, index, values, iloc=False, verbose=True):
+        if self.aliased and not iloc:
+            location, missing = self.alias_to_index(index, return_missing=True)
+            if not missing.empty:
+                if verbose:
+                    report(f"Unable to update array '{self.name}': {index} not found in array index")
+                return
+            index = location.i
+        self.write(index, values)
+
+    def refresh(self):
+        if self.persistent_read:
+            del self._reader
+            self._reader = np.memmap(self.path, dtype=self.dtype, mode='r+', shape=self.shape)
+
+        if self.persistent_write:
+            del self._writer
+            mode = 'r+' if os.path.isfile(self.path) else 'w+'
+            self._writer = np.memmap(self.path, dtype=self.dtype, mode=mode, shape=self.shape)
+        self.n_calls = 0
 
     @property
     def reader(self):
-        return np.memmap(self.path, dtype=self.dtype, mode='r+', shape=self.shape)
+        if self._reader is not None:
+            return self._reader
+        else:
+            return np.memmap(self.path, dtype=self.dtype, mode='r+', shape=self.shape)
 
     @property
     def writer(self):
-        mode = 'r+' if os.path.isfile(self.path) else 'w+'
-        return np.memmap(self.path, dtype=self.dtype, mode=mode, shape=self.shape)
+        if self._writer is not None:
+            return self._writer
+        else:
+            mode = 'r+' if os.path.isfile(self.path) else 'w+'
+            return np.memmap(self.path, dtype=self.dtype, mode=mode, shape=self.shape)
 
 
 class DateManager(object):
@@ -118,26 +168,31 @@ class DateManager(object):
         self.start_date = start_date
         self.end_date = end_date
 
-    def date_offset(self, start, end, coerce=True, return_msg=False):
-        messages = []
-        start_offset, end_offset = 0, 0
-        if self.start_date > start:  # scenarios start later than selected start date
-            messages.append('start date is earlier')
-        else:
-            start_offset = (start - self.start_date).astype(int)
-        if self.end_date < end:
-            messages.append('end date is later')
-        else:
-            end_offset = (end - self.end_date).astype(int)
+    def adjust_dates(self, start_offset=0, end_offset=0):
+        try:
+            self.start_date += start_offset
+            self.end_date += end_offset
+        except TypeError:
 
+            self.start_date += np.timedelta64(int(start_offset), 'D')
+            self.end_date += np.timedelta64(int(end_offset), 'D')
+
+    def date_offset(self, start_date, end_date, coerce=True, n_dates=None):
+        """
+        Find the overlap between the class' date range and the provided date range
+        :param start_date: The beginning of the provided date range (datetime)
+        :param end_date: The end of the provided date range (datetime)
+        :param coerce: Adjust the class range to the overlap between ranges (bool)
+        :return:
+        """
+        # A positive number indicates that the provided dates are inside the range, negative indicates outside
+        start_offset = start_date - self.start_date
+        end_offset = self.end_date - end_date
         if coerce:
-            self.start_date = self.start_date + np.timedelta64(int(start_offset), 'D')
-            self.end_date = self.end_date + np.timedelta64(int(end_offset), 'D')
-
-        if return_msg:
-            return start_offset, end_offset, messages
-        else:
-            return start_offset, end_offset
+            self.adjust_dates(start_offset, end_offset)
+        if n_dates is not None and end_offset.astype('int') == 0:
+            end_offset = np.timedelta64(-n_dates, 'D')
+        return start_offset.astype('int'), end_offset.astype('int')
 
     @property
     def dates(self):
@@ -200,7 +255,7 @@ class FieldManager(object):
         self.path = path
         self.name_col = name_col
         self.matrix = None
-        self.expanded_cols = []
+        self.extended = []
         self.refresh()
         self._convert = None
 
@@ -226,51 +281,60 @@ class FieldManager(object):
             data_types = {key: val for key, val in data_types.items() if key in cols}
         return {key: eval(val) for key, val in data_types.items()}
 
-    def expand(self, expand_col, numbers):
+    def expand(self, select_field, numbers):
         """
         Certain fields are repeated during processing - for example, the streamflow (q) field becomes monthly
         flow (q_1, q_2...q_12), and soil parameters linked to soil horizon will have multiple values for a single
         scenario (e.g., sand_1, sand_2, sand_3). This function adds these extended fields to the FieldManager.
-        :param expand_col: Column in fields_and_qc.csv to expand from
-        :param numbers: Specify a number of expansions or a fixed set
+        :param mode: 'depth', 'horizon', or 'monthly'
+        :param n_horizons: Optional parameter when specifying a number to expand to (int)
         """
         if type(numbers) == int:
             numbers = np.arange(numbers) + 1
-        old_rows = self.matrix[(self.matrix[expand_col] == 0) | (np.isnan(self.matrix[expand_col]))]
-        new_rows = []
-        extend_rows = self.matrix[self.matrix[expand_col] > 0]
-        for i in numbers:
-            next_set = extend_rows.copy()
-            next_set[self.name_col] = next_set[self.name_col] + "_" + str(i)
-            if next_set['extension'].any():
-                report("Warning: fields have already been extended")
-            next_set['extension'] = i
-            new_rows.append(next_set)
-        new_rows = pd.concat(new_rows, axis=0)
-        self.matrix = pd.concat([old_rows, new_rows], axis=0)
 
-    def fetch(self, from_col, dtypes=False, field_filter=None, index_field='internal_name'):
+        # Check to make sure it's only been extended once
+        if not select_field in self.extended:
+            condition = select_field + '_extended'
+            # Find each row that applies, duplicate, and append to the matrix
+            self.matrix[condition] = 0
+            burn = self.matrix[condition].copy()
+            new_rows = []
+            for idx, row in self.matrix[self.matrix[select_field] == 1].iterrows():
+                burn.iloc[idx] = 1
+                for i in numbers:
+                    new_row = row.copy()
+                    new_row[self.name_col] = row[self.name_col] + "_" + str(i)
+                    new_row[condition] = 1
+                    new_rows.append(new_row)
+            new_rows = pd.concat(new_rows, axis=1).T
+
+            # Filter out the old rows and add new ones
+            self.matrix = pd.concat([self.matrix[~(burn == 1)], new_rows], axis=0)
+
+            # Record that the duplication has occurred
+            self.extended.append(select_field)
+
+    def fetch(self, source, dtypes=False, field_filter=None, index_field='internal_name'):
         """
         Subset the FieldManager matrix (fields_and_qc.csv) based on the values in a given column
         If the numbers are ordered, the returned list of fields will be in the same order. The names_only parameter
         can be turned off to return all other fields (e.g., QAQC fields) from fields_and_qc.csv for the same subset.
-        :param from_col: The column in fields_and_qc.csv used to make the selection (str)
+        :param source: The column in fields_and_qc.csv used to make the selection (str)
         :param dtypes: Return the data types for each column (bool)
         :param field_filter: Only return column names if they appear in the filter (iter)
         :return: Subset of the field matrix (df)
         """
 
         try:
-            out_fields = self.matrix[self.matrix[from_col] > 0]
-            if out_fields[from_col].max() > 0:
-                out_fields = out_fields.sort_values([from_col, 'extension'])[index_field].values
+            out_fields = self.matrix[self.matrix[source] > 0]
+            if out_fields[source].max() > 0:
+                out_fields = out_fields.sort_values(source)[index_field].values
             if field_filter is not None:
                 out_fields = [f for f in out_fields if f in field_filter]
-            out_fields = list(out_fields)
             data_type = self.data_type(cols=out_fields)
         except KeyError as e:
             raise e
-            report("Unrecognized sub-table '{}'".format(from_col))
+            report("Unrecognized sub-table '{}'".format(source))
             out_fields, data_type = None, None
 
         if dtypes:
@@ -337,8 +401,7 @@ class FieldManager(object):
         # Read the fields/QC matrix
         if self.path is not None:
             self.matrix = pd.read_csv(self.path)
-        self.matrix['extension'] = 0
-        self.matrix['original_index'] = self.matrix.index
+        self.extended = []
 
 
 def report(message, tabs=0):
